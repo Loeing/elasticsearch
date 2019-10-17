@@ -35,6 +35,16 @@ class JdbcStatement implements Statement, JdbcWrapper {
         this.requestMeta = new RequestMeta(info.pageSize(), info.pageTimeout(), info.queryTimeout());
     }
 
+
+    /*
+     * Tableau seems to generate it's queries intended for ES by calling ""."indexName"
+     * this causes a extrenuous input '.' error message. This workaround is intended to fix that error 
+     * by removing the offending substring
+     */
+    private String tableauWorkaround(String sql) {
+        return sql.replace("\"\".", "");
+    }
+
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
         if (!execute(sql)) {

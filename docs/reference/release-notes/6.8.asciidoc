@@ -1,7 +1,7 @@
-[[release-notes-6.8.3]]
-== {es} version 6.8.3
+[[release-notes-6.8.0]]
+== {es} version 6.8.0
 
-[[enhancement-6.8.3]]
+[[enhancement-6.8.0]]
 [float]
 === Enhancements
 
@@ -16,7 +16,7 @@ Infra/Settings::
 
 
 
-[[bug-6.8.3]]
+[[bug-6.8.0]]
 [float]
 === Bug fixes
 
@@ -63,7 +63,7 @@ Security::
 * Use system context for looking up connected nodes {pull}43991[#43991] (issue: {issue}43974[#43974])
 
 
-[[upgrade-6.8.3]]
+[[upgrade-6.8.0]]
 [float]
 === Upgrades
 

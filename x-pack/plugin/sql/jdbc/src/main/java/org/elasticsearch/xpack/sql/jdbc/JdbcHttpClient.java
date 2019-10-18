@@ -5,23 +5,20 @@
  */
 package org.elasticsearch.xpack.sql.jdbc;
 
-import org.elasticsearch.common.collect.Tuple;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.xpack.sql.client.HttpClient;
-import org.elasticsearch.xpack.sql.client.Version;
-import org.elasticsearch.xpack.sql.proto.ColumnInfo;
-import org.elasticsearch.xpack.sql.proto.MainResponse;
-import org.elasticsearch.xpack.sql.proto.Mode;
-import org.elasticsearch.xpack.sql.proto.RequestInfo;
-import org.elasticsearch.xpack.sql.proto.SqlQueryRequest;
-import org.elasticsearch.xpack.sql.proto.SqlQueryResponse;
-import org.elasticsearch.xpack.sql.proto.SqlTypedParamValue;
+import static org.elasticsearch.xpack.sql.client.StringUtils.EMPTY;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.elasticsearch.xpack.sql.client.StringUtils.EMPTY;
+import org.elasticsearch.common.collect.Tuple;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.xpack.sql.proto.ColumnInfo;
+import org.elasticsearch.xpack.sql.proto.MainResponse;
+import org.elasticsearch.xpack.sql.proto.RequestInfo;
+import org.elasticsearch.xpack.sql.proto.SqlQueryRequest;
+import org.elasticsearch.xpack.sql.proto.SqlQueryResponse;
+import org.elasticsearch.xpack.sql.proto.SqlTypedParamValue;
 
 /**
  * JDBC specific HTTP client.
@@ -53,8 +50,19 @@ class JdbcHttpClient {
         return httpClient.ping(timeoutInMs);
     }
 
+    /*
+     * Tableau seems to generate it's queries intended for ES by calling ""."indexName" (beacause it's trying the DB name)
+     * this causes a extrenuous input '.' error message. This workaround is intended to fix that error 
+     * by removing the offending substring
+     * yes, I know this method is also in Statements. This is a hack, deal with it
+     */
+    private String tableauWorkaround(String sql) {
+        return sql.replaceAll("\"\".", "");
+    }
+
     Cursor query(String sql, List<SqlTypedParamValue> params, RequestMeta meta) throws SQLException {
         int fetch = meta.fetchSize() > 0 ? meta.fetchSize() : conCfg.pageSize();
+        sql = tableauWorkaround(sql);
         SqlQueryRequest sqlRequest = new SqlQueryRequest(sql, params, conCfg.zoneId(),
                 fetch,
                 TimeValue.timeValueMillis(meta.timeoutInMs()),

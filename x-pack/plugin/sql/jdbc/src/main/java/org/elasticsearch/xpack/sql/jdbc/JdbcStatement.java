@@ -5,8 +5,6 @@
  */
 package org.elasticsearch.xpack.sql.jdbc;
 
-import org.elasticsearch.xpack.sql.proto.SqlTypedParamValue;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,6 +14,8 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.elasticsearch.xpack.sql.proto.SqlTypedParamValue;
 
 class JdbcStatement implements Statement, JdbcWrapper {
 
@@ -42,7 +42,7 @@ class JdbcStatement implements Statement, JdbcWrapper {
      * by removing the offending substring
      */
     private String tableauWorkaround(String sql) {
-        return sql.replace("\"\".", "");
+        return sql.replaceAll("\"\".", "");
     }
 
     @Override

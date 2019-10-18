@@ -5,12 +5,12 @@
  */
 package org.elasticsearch.xpack.sql.jdbc;
 
-import org.elasticsearch.xpack.sql.proto.SqlTypedParamValue;
-
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.elasticsearch.xpack.sql.proto.SqlTypedParamValue;
 
 class PreparedQuery {
 
@@ -28,9 +28,19 @@ class PreparedQuery {
     private final ParamInfo[] params;
 
     private PreparedQuery(String sql, int paramCount) {
-        this.sql = sql;
+        this.sql = tableauWorkaround(sql);
         this.params = new ParamInfo[paramCount];
         clearParams();
+    }
+    
+    /*
+     * Tableau seems to generate it's queries intended for ES by calling ""."indexName" (beacause it's trying the DB name)
+     * this causes a extrenuous input '.' error message. This workaround is intended to fix that error 
+     * by removing the offending substring
+     * and yes, here too, just to be safe
+     */
+    private String tableauWorkaround(String sql) {
+        return sql.replaceAll("\"\".", "");
     }
 
     ParamInfo getParam(int param) throws JdbcSQLException {
